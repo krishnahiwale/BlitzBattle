@@ -127,8 +127,6 @@ The test suite is included in the source; passing local checks **does not verify
 - [Monad rewards](docs/REWARDS.md) — funding, winner allocation, claims and expiry.
 - [Security](docs/SECURITY.md) — protections, risks and public hosting requirements.
 - [Deployment](docs/DEPLOYMENT.md) — GitHub publishing, hosting dependencies, and deployment evidence.
-- [Demo script](docs/DEMO.md) — a three-minute demonstration plan.
-- [Judge checklist](docs/SUBMISSION.md) — the supplied 400-point rubric and verification evidence.
 
 ## Publish the full source to your existing GitHub repo
 
