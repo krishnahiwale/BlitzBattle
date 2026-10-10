@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-10-10T12:50:14.069Z",
+  "chainId": "10143",
+  "address": "0x9fe13a91e3926de004f7488771ee909e344fb0c9",
+  "room": "76GW4Q",
+  "fundingTransaction": "0x24cbfa0320cf7445a0f8bd35584aa88f33d54b95400e3d7dc501c23507b09040",
+  "receiptStatus": 1,
+  "blockNumber": 69816499,
+  "blockTime": "2026-10-10T11:44:21.000Z",
+  "bytecodeMatches": true,
+  "events": [
+    {
+      "name": "Funded",
+      "args": [
+        "0x7adbf14a7811c39aac7bf4af15361a07dc5aa469fa7b1f749d3bd05daff41a5d",
+        "0xbCE5Fed6F06b66238cD4974973d2b41B9E0E2156",
+        "10000000000000000",
+        "1791719052"
+      ]
+    }
+  ],
+  "pool": [
+    "0xbCE5Fed6F06b66238cD4974973d2b41B9E0E2156",
+    "10000000000000000",
+    "1791719052",
+    false
+  ],
+  "sourceVerification": {
+    "match": "exact_match",
+    "creationMatch": "exact_match",
+    "runtimeMatch": "exact_match",
+    "chainId": "10143",
+    "address": "0x9fe13a91e3926DE004f7488771Ee909E344fb0C9",
+    "verifiedAt": "2026-10-10T12:52:11Z",
+    "matchId": "55874323"
+  },
+  "deployment": {
+    "transactionHash": "0x13dca6f1eed4056a643849ff6f0c0208ca1c5b9971c72f8319da40428e87d667",
+    "blockNumber": "69808460",
+    "transactionIndex": "4",
+    "deployer": "0xbCE5Fed6F06b66238cD4974973d2b41B9E0E2156"
+  },
+  "compilation": {
+    "language": "Solidity",
+    "compiler": "solc",
+    "compilerVersion": "0.8.28+commit.7893614a",
+    "compilerSettings": {
+      "optimizer": {
+        "runs": 200,
+        "enabled": true
+      },
+      "evmVersion": "paris"
+    },
+    "name": "BlitzRewards",
+    "fullyQualifiedName": "BlitzRewards.sol:BlitzRewards"
+  },
+  "monadscanStatus": "Forwarded by Sourcify; final external status unconfirmed (API key required).",
+  "settlementAndClaim": "Not evidenced in this check."
+}

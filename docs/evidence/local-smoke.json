@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-10T12:54:35Z",
+  "html": true,
+  "database": true,
+  "twoIsolatedPlayers": true,
+  "hostCanStart": true,
+  "questionAndAnswer": true,
+  "localOrigin": "http://127.0.0.1:8788"
+}
