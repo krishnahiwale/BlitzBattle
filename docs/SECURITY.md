@@ -1,33 +1,32 @@
-# Security, trust boundaries and known limitations
+# Security and privacy boundaries
 
-**Status:** educational hackathon MVP. Do not use real financial assets or infer that local tests equal a formal audit.
+## Implemented controls
 
-## What the prototype implements
+- Random 256-bit guest bearer tokens; SHA-256 identifiers in game records. The client serializes session initialization and uses a header when embedded-browser cookies are blocked.
+- Host checks for start, insights and reward registration; server-side answer timing and scoring; unique participant and answer constraints.
+- Same-origin POST checks and bounded request/input lengths.
+- Wallet ownership verified with a signed challenge containing origin, session, room and wallet.
+- Funding/settlement registration checks a successful receipt, target contract, exact runtime bytecode, matching event, sponsor and server-derived winners.
+- Pull claims, checks before external transfers, and a reentrancy guard in the escrow.
 
-- Server-side answer scoring, delayed exposure of correct answers, time-window checks, one answer per question, capacity and uniqueness constraints.
-- Host and player tokens stored as SHA-256 hashes in D1 rather than plaintext.
-- Wallet ownership verified via room-/player-bound, expiring signed messages; eligible wallet locked before start.
-- Monad chain ID checks, confirmed funding/settlement/claim receipts, runtime contract-bytecode verification in backend.
-- Solidity allocation state updated **before** external reward transfer in `claim()` and `refund()`; repeat claims blocked.
-- Expiration limits and a no-debt settlement path.
+## What these controls do not provide
 
-## High-priority production blockers
+The sponsor is trusted to attest winners and can bypass the frontend. The backend can determine scores. The public question bank can be studied in advance. A person can open multiple browser sessions/wallets. Per-session room limits are not strong global abuse protection. This is not a trustless game, anti-cheat examination platform, independently audited financial product, or mainnet-ready service.
 
-1. **Identity gateway requirement:** `app/chatgpt-auth.ts` and server host authorization depend on `oai-authenticated-user-id` / related headers being inserted by the original ChatGPT Sites authentication gateway. For public standalone hosting, integrate actual login and ensure a trusted proxy **strips all client-supplied identity headers and injects only authenticated values**. The development mock route is insecure for public use. Do **not** expose this as a secure public login without replacing the gateway.
-2. **Non-cryptographic winner oracle:** The backend scores, but the host chooses the actual winner array in `finalize`. Users should review the posted winners; future development could introduce signed result attestations/dispute windows.
-3. **Wallets ≠ people:** There is no strong identity or anti-sybil mechanism; a wallet signature proves control of that address only.
-4. **Unaudited contracts:** `BlitzRewards` lacks independent audit, governance and extensive mainnet risk controls. Use **testnet** only.
-5. **Access tokens are credentials:** Host/player tokens in browser state or logs can provide impersonation capability. Do not put them into public repo, screenshots, analytics or URL query strings.
-6. **D1 persistence:** Protect the production database and backup process; do not commit `.wrangler/state`, exports or credential files.
-7. **Question bank confidentiality:** Answer keys are server-side in code, but this is not cryptographically secret after the full code is open-sourced; a participant could read this public GitHub repository to know all answers. For meaningful judged competitions, curate and rotate questions after publishing.
+Guest sessions persist in local storage and, when accepted, an HttpOnly cookie. JavaScript access to the header token makes XSS prevention important. Protect dependencies and HTML rendering; do not add unsafe HTML injection. Clearing storage can lose host access. Display names are not proof of identity, and the app must not recover host control by name alone.
 
-## Repository safety checklist
+## Public and private data
 
-- [ ] No `.env` values, wallet seed phrases, private keys, host tokens or player tokens committed.
-- [ ] Ignore `node_modules`, `.wrangler/`, `.sites-runtime/`, `.next/`, `dist/`, `.git/`.
-- [ ] Development mock authentication disabled or replaced for public hosting.
-- [ ] Immutable contract bytecode matches the published source/artifact.
-- [ ] No production funds or unsupported claims in marketing/demos.
-- [ ] External dependencies and cloud permissions reviewed before public launch.
+| Data | Visibility |
+| --- | --- |
+| Room code, title, roster, linked wallets, completed-round scores | Room state is public to anyone who knows its code; recent rooms are listed |
+| Final answers/explanations | Available after the battle; also present in the public source bank |
+| Individual guest bearer token | Private credential; never include in logs, screenshots or shared links |
+| Host session hash | Stored in D1; the hash is distinct from the usable bearer token |
+| Chain transactions and wallet addresses | Public blockchain records |
+| Local receipts and display name | Stored in the browser; receipts also refer to public chain activity |
+| Wallet seed phrase/private key | Never collected by the application |
 
-**Disclosure:** Local tests and a previously hosted private demo do not establish that this repository is independently deployed on Monad Testnet or available publicly now.
+There is no account recovery, moderation dashboard or automatic data deletion policy in this MVP. Avoid real names if unnecessary. For larger public events, plan abuse controls, retention, moderation and a contract review before making stronger reliability or security promises.
+
+For a suspected issue, contact the repository owner privately through an established channel. Share a minimal reproduction without keys or bearer tokens. Do not test exploitation against other participants' live rooms.

@@ -1,180 +1,134 @@
-# ⚡ BlitzBattle — Learn. Battle. Prove It.
+# ⚡ BlitzBattle — Learn. Battle. Prove it.
 
-**Five questions. One room. Real learning. Optional rewards on Monad.**
+**Five questions. A shared arena. A useful learning recap. Optional rewards on Monad Testnet.**
 
-BlitzBattle is a multiplayer quiz app for college clubs, student communities and learning events. Friends join a room, answer five short questions together, check the leaderboard, and leave knowing *why* each answer was right or wrong. A host can also fund a reward battle on Monad Testnet, where eligible winners claim their share from a smart contract.
+BlitzBattle is a short multiplayer quiz for college clubs, study groups and developer meetups. A host picks a topic, friends join with a room code, and everyone answers the same timed questions. The leaderboard makes it competitive; explanations and concept insights make it useful after the competition ends.
 
-This started with a simple question: **Why should a college quiz end with just a score?** We wanted to make it competitive, useful for learning and transparent when prizes are involved.
+You can play for free without a wallet. For sponsored battles, a smart contract holds testnet MON and lets winners claim their allocation after the host records the results.
 
-## Try BlitzBattle and explore the code
+## Open the app and its proof
 
-| Resource | Link / status |
+| Resource | Link |
 | --- | --- |
-| **Public source code** | [GitHub — krishnahiwale/BlitzBattle](https://github.com/krishnahiwale/BlitzBattle) |
-| **Original development preview** | [Open development preview](https://labelrush-monad.krishh013.chatgpt.site) — public, logged-out access has **not** been independently confirmed |
-| **Independently verified public live app** | **Not yet verified**; do not use the preview as prize-eligibility evidence without testing it |
-| **Blockchain network** | **Monad Testnet**, chain ID **10143** |
-| **Reward contract address** | **Not yet provided or verified**; BlitzBattle deploys a separate escrow for each funded battle |
-| **Explorer** | [Monad Testnet explorer](https://testnet.monadscan.com/) |
-| **Three-minute demo guide** | [Preparing for Your Project Demo](docs/DEMO.md) |
+| Live app | [Play BlitzBattle](https://labelrush-monad.krishh013.chatgpt.site) |
+| Updated public source | [release/deployed-site-2026-10-10](https://github.com/krishnahiwale/BlitzBattle/tree/release/deployed-site-2026-10-10) |
+| Download complete source | [Source ZIP](https://github.com/krishnahiwale/BlitzBattle/archive/refs/heads/release/deployed-site-2026-10-10.zip) |
+| Monad Testnet contract | [`0x9fe13a91e3926DE004f7488771Ee909E344fb0C9`](https://testnet.monadscan.com/address/0x9fe13a91e3926DE004f7488771Ee909E344fb0C9#code) |
+| Verified contract source | [Sourcify — exact creation and runtime match](https://repo.sourcify.dev/10143/0x9fe13a91e3926DE004f7488771Ee909E344fb0C9) |
+| Successful funding transaction | [`0x24cbfa…09040`](https://testnet.monadscan.com/tx/0x24cbfa0320cf7445a0f8bd35584aa88f33d54b95400e3d7dc501c23507b09040) |
+| Contract deployment transaction | [`0x13dca6…7d667`](https://testnet.monadscan.com/tx/0x13dca6f1eed4056a643849ff6f0c0208ca1c5b9971c72f8319da40428e87d667) |
 
-We will only add a live contract address, confirmed transaction and verified public URL when we have real evidence. **Testnet MON is for testing, not a real-money prize.**
+**Release status:** this branch publishes the source already deployed at 4:06 PM IST on 10 October 2026, including the battle-start fix. Its GitHub publication and this documentation were prepared **after** the 5:30 PM code freeze and 5:45 PM submission deadline. The existing `main` branch is preserved. This is not a claim that the updated branch was submitted on time. See [release provenance](docs/RELEASE_STATUS.md).
 
-## What problem does this solve?
+The site's audience was changed to **public** at 6:18 PM IST. A logged-out automated request encountered Cloudflare bot filtering, so a normal logged-out browser visit still needs confirmation. The successful funding transaction occurred at **5:14:21 PM IST**. Sourcify verification completed at **6:22:11 PM IST**. Explorer verification on Monadscan itself has not been independently confirmed.
 
-Think about a regular college quiz. Someone shares a form, students submit answers, a leaderboard appears, and everyone moves on. It may be competitive, but it rarely helps people understand what they missed.
+## What you can do
 
-There is another problem when prizes are involved: participants have to trust the organizer's promise to pay.
+- **Practice solo:** five questions, your own score and explanations; no wallet or simulated opponents.
+- **Host or join a battle:** share a six-character code or invite URL; up to **16 players**.
+- **Compete in real time:** a four-second countdown, then five **20-second** questions, with room updates every two seconds.
+- **Learn from the result:** review your answers, explanations and the final leaderboard. Hosts also get per-concept learning insights.
+- **Keep a record:** revisit battles in the same browser session and download results as JSON.
+- **Use optional testnet rewards:** connect and link wallets, deploy or reuse the escrow, fund a room, settle tied winners, claim, recover confirmed receipts, and refund an expired unsettled pool.
 
-**BlitzBattle brings those two pieces together.** The quiz and feedback happen in a fast multiplayer app. Optional sponsor-funded prizes are held by a Monad smart contract, so the funding and payout transactions can be inspected publicly.
+Three curated packs are included: **AI & Machine Learning**, **Web3 & Monad**, and **Python & Data**. There is no AI model dependency or paid API key requirement.
 
-## What can you do in the app?
+## Your first battle
 
-- **Choose your topic:** AI & Machine Learning, Web3 & Monad, or Python & Data.
-- **Play without a wallet:** Try a solo practice battle against two clearly labelled simulated players.
-- **Host a real room:** Create a battle and share its six-character join code; rooms support up to 20 participants.
-- **Race the clock, not each other:** Each battle has five questions. The host can set 10, 12, 15 or 20 seconds per question. Correct answers earn 100 points; there is no speed bonus.
-- **Actually learn something:** Read explanations, see the final leaderboard and review the concepts you missed.
-- **Understand the group:** Organizers can view topic-level insights to see where participants struggled.
-- **Add optional Monad rewards:** In a funded room, players prove control of a wallet, and eligible winners can claim an equal share after the host finalizes the result.
+1. Open the [app](https://labelrush-monad.krishh013.chatgpt.site) and choose **Create a battle**.
+2. Enter your display name, choose a pack, and leave the optional reward pool off.
+3. Share the code with a friend. Use different browser profiles if you are testing both players yourself.
+4. As host, select **Start battle** after another player joins. If you are alone, **Start solo practice** starts immediately as a practice room.
+5. Answer each question once, then read the recap and inspect the results.
 
-### A typical battle
+The original start issue came from player identity changing when embedded browsers blocked cookies. The fixed client initializes one session, saves its random bearer token locally, and sends it with every API request. Refreshing keeps the host identity. Old rooms whose session was already lost cannot safely be reassigned; create a fresh room in that case.
 
-1. A club host chooses **AI & Machine Learning** and creates a room.
-2. Players enter the **six-character code** and wait in the lobby.
-3. The host starts the battle. Everyone sees the same five timed questions.
-4. The server checks answers and calculates scores.
-5. Players see a leaderboard and explanations; the organizer sees learning insights.
-6. **Only in a funded reward room:** the host finalizes the eligible winner list and winners claim their allocation on Monad.
+### Scoring
 
-A player can learn and compete without needing cryptocurrency. Wallets are needed for the on-chain reward experience.
+A correct answer earns `100 + floor(50 × remaining_ms / 20000)` points, up to 150. A wrong or missed answer earns zero. The server calculates time and score; network delay can affect the speed bonus. All players tied for the highest total share first place. Join order only stabilizes display order.
 
-## Where Monad fits in
+## Run the complete project locally
 
-We didn't put the entire quiz on a blockchain. Fast question timing, room updates and answer checking belong on the application server. **Monad is used for the part that benefits from public verification: holding and paying the reward pool.**
+Use **Node.js 24** (tested with 24.19.0), **pnpm 11.25.0**, and Git. Linux was tested; Windows users should use WSL2 for the included POSIX test runner. No wallet, Cloudflare account, or secrets are required for ordinary local play.
 
-The **BlitzRewards** smart contract is in [contracts/BlitzRewards.sol](contracts/BlitzRewards.sol).
-
-For each funded room:
-
-1. The host deploys a new **BlitzRewards** contract and sends a prize pool of testnet MON.
-2. The application checks the **confirmed contract deployment and funding** rather than trusting a screenshot or an unconfirmed transaction hash.
-3. Players sign wallet ownership challenges; they do not give us private keys.
-4. The backend scores the quiz and identifies eligible highest scorers.
-5. The **host** submits those winners to the contract using **finalize**.
-6. Each winner calls **claim** to collect their equal share. A successful claim cannot be repeated.
-7. After the applicable deadline, the host can recover remaining funds using **refund**.
-
-**What the contract guarantees:** custody of the funded pool, recorded winner allocations, one-time claims, and time-limited refund rules.
-
-**What it does not guarantee:** it cannot independently check quiz answers or prove the host submitted an honest list. The server scores questions, and the host is trusted to finalize the matching winners. The smart contract has not been independently audited.
-
-Read the [reward flow and trust model](docs/REWARDS.md) for more detail.
-
-## What makes BlitzBattle different?
-
-**Learning after competition.** Every answer has an explanation, so losing a round can still teach you something useful.
-
-**A fairer score.** A correct answer earns the same 100 points regardless of who clicks fastest. Question windows are enforced by the server, not just a browser countdown.
-
-**Sponsor transparency.** If a battle is funded, a student can inspect the escrow and the claim transaction on Monad Testnet.
-
-**Built for small communities.** A club can create a short battle without setting up a huge tournament system. Students join using one code.
-
-**Useful feedback for organizers.** The host can see difficult concepts and use that information to plan a better workshop or study session.
-
-We see potential in student clubs, colleges, developer communities, training programs and sponsored education events. A possible future business model is premium host tools, branded events and sponsor analytics. **This MVP does not claim paying customers or live revenue.**
-
-## Built with
-
-| Part | Technology | Why |
-| --- | --- | --- |
-| Interface | Next.js, React, TypeScript, Tailwind CSS | Responsive quiz and room experience |
-| API and room logic | Cloudflare Workers / Next-compatible routes | Handle joins, answers and server-side game timing |
-| Data | Cloudflare D1 (SQLite) and Drizzle | Save rooms, players, answers and results |
-| Blockchain | Solidity 0.8.24 and ethers.js | Fund escrow, finalize allocations and claim testnet MON |
-| Network | Monad Testnet (10143) | EVM-compatible blockchain transactions |
-| Quality checks | Node tests, Ganache test EVM, project scripts | Check game lifecycle and contract behaviour locally |
-
-The main engineering challenge was keeping **quiz state** and **money state** separate. We use the server for scores and a smart contract for payouts. The application is designed to check actual on-chain transaction receipts, not just wallet popups.
-
-### Main source files
-
-| Path | Purpose |
-| --- | --- |
-| [app/page.tsx](app/page.tsx) | Main app screens and interactions |
-| [lib/server.ts](lib/server.ts) | Room and answer API logic |
-| [lib/game.ts](lib/game.ts) | Game phases, scores and result rules |
-| [lib/questions.ts](lib/questions.ts) | Quiz packs and explanations |
-| [lib/wallet.ts](lib/wallet.ts) | Wallet interaction |
-| [lib/chain-server.ts](lib/chain-server.ts) | Blockchain receipt checks |
-| [contracts/BlitzRewards.sol](contracts/BlitzRewards.sol) | Reward escrow |
-| [db/schema.ts](db/schema.ts) | Database tables |
-| [drizzle/0000_grey_champions.sql](drizzle/0000_grey_champions.sql) | Local database migration |
-
-## Run it on your computer
-
-You'll need **Node.js 22.13+**, **pnpm 11.25.0**, Git and a browser.
-
-Clone and install:
-
-~~~bash
-git clone https://github.com/krishnahiwale/BlitzBattle.git
+```bash
+git clone --branch release/deployed-site-2026-10-10 https://github.com/krishnahiwale/BlitzBattle.git
 cd BlitzBattle
 npm install --global pnpm@11.25.0
-pnpm install --frozen-lockfile
+
+# Local install settings: decline two optional native optimizations.
+pnpm config set --location=project --json allowBuilds '{"bufferutil":false,"esbuild":true,"fsevents":true,"sharp":true,"unrs-resolver":true,"utf-8-validate":false,"workerd":true}'
+
+# Expose the already-locked esbuild binary used by the test runner.
+pnpm install --frozen-lockfile --public-hoist-pattern=esbuild
 pnpm run build
-~~~
 
-Initialize the local Cloudflare D1 database **once** on a fresh setup:
+# Run ONCE for a fresh local database.
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_closed_jubilee.sql
 
-~~~bash
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_grey_champions.sql
-~~~
+pnpm start --port 8787
+```
 
-Start the app:
+Open **http://127.0.0.1:8787** after Wrangler prints `Ready`. This runs the built frontend, API and a persistent local D1 database together. Do not reapply the initial SQL to an existing database. The local install-setting command intentionally changes your checkout's `pnpm-workspace.yaml`; the published file remains identical to the deployed source.
 
-~~~bash
-pnpm run dev
-~~~
+For development with live reload, stop the server and run `pnpm dev`; use the URL it prints (normally port 5173). This version does **not** require a mock sign-in to play. Full setup and troubleshooting: [Getting started](docs/GETTING_STARTED.md).
 
-Open this development-only address in your browser:
+```bash
+pnpm run typecheck
+pnpm test
+pnpm run build
+```
 
-**http://localhost:5173/signin-with-chatgpt?return_to=%2F**
+These passed on the exported checkout using the setup above: **six service/session tests and one contract integration test**. Read [testing and limitations](docs/TESTING.md) for the exact scope.
 
-The recovered project uses a **mock local sign-in** for development. That is not secure public authentication. A production deployment needs a real authentication provider and working Cloudflare Worker/D1 infrastructure; merely uploading the repo to static hosting will not make the complete application work.
+## How it works
 
-Run the included checks:
+| Layer | Technology | Responsibility |
+| --- | --- | --- |
+| Interface | React 19, TypeScript, CSS, Lucide | Lobby, arena, recap, rewards and host insights |
+| Build and routes | Vinext/Vite, Next-compatible App Router | Bundle the browser and Worker application |
+| Backend | Cloudflare Workers | Validate sessions, joins, answers and reward receipts |
+| Storage | Cloudflare D1, SQLite, Drizzle schema | Persist rooms, players and answers |
+| Wallet | ethers 6, injected EVM provider | Request signatures and user-approved transactions |
+| Escrow | Solidity **0.8.28**, Monad Testnet | Hold pools, record allocations, allow claims and expired refunds |
 
-~~~bash
-pnpm run check
-pnpm run contract:compile
-~~~
+The backend scores the quiz. The **sponsor attests the winners**. The contract enforces escrow and claim rules, but does not independently verify quiz answers. This is the project's central trust boundary; a dishonest sponsor can bypass the UI and submit a different winner list directly. The app detects a mismatch when registering settlement but cannot reverse an on-chain transaction.
 
-These commands are supplied for reproduction; **the full checks were not rerun during this README rewrite**. Detailed help: [Getting Started](docs/GETTING_STARTED.md), [Architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [Security](docs/SECURITY.md), [Deployment](docs/DEPLOYMENT.md).
+GitHub hosts this repository. The running full-stack application is hosted on **ChatGPT Sites / Cloudflare Workers + D1**. GitHub Pages alone cannot run its API or database.
 
+## Repository map
 
-### Evidence judges need
+| Path | What is inside |
+| --- | --- |
+| `app/page.tsx`, `app/globals.css` | Application screens and visual design |
+| `app/api/battle/route.ts` | HTTP API, wallet signatures and on-chain receipt checks |
+| `lib/service.ts`, `lib/questions.ts` | Battle rules, scoring and curated question packs |
+| `lib/session.ts`, `lib/client-api.ts` | Stable player identity and serialized session initialization |
+| `lib/chain.ts`, `lib/contract.json` | Network settings and compiled escrow ABI/bytecode |
+| `db/schema.ts`, `drizzle/` | Database schema and included initial migration |
+| `contracts/BlitzRewards.sol` | Human-readable escrow source |
+| `public/contracts/` | Matching downloadable source and standard JSON verification input |
+| `test/`, `scripts/` | Tests, compilation and build tooling |
+| `docs/` | Setup, architecture, API, rewards, deployment, security and event evidence |
 
-The Pune V3 judging rules require us to **say these four details aloud**:
+## Documentation
 
-- **GitHub:** https://github.com/krishnahiwale/BlitzBattle
-- **Live public app:** **Not independently verified yet**
-- **Contract:** **No confirmed funded-room contract address supplied yet**
-- **Deployment:** **Monad Testnet, chain ID 10143 — actual deployment evidence still required**
+| Start here if you want to… | Read |
+| --- | --- |
+| Understand the player and host experience | [User guide](docs/USER_GUIDE.md) |
+| Run your own copy | [Getting started](docs/GETTING_STARTED.md) |
+| Understand the design and data | [Architecture](docs/ARCHITECTURE.md) |
+| Integrate with the backend | [API reference](docs/API.md) |
+| Deploy, fund, verify or claim rewards | [Contracts and rewards](docs/REWARDS.md) |
+| Host the complete app | [Deployment](docs/DEPLOYMENT.md) |
+| Review test coverage and trust boundaries | [Testing](docs/TESTING.md) · [Security](docs/SECURITY.md) |
+| Prepare the three-minute pitch and videos | [Demo and social drafts](docs/DEMO.md) |
+| Map every judging criterion to evidence | [400-point checklist](docs/JUDGING.md) |
+| Understand customers and business hypotheses | [Product strategy](docs/PRODUCT.md) |
+| Check what existed before the deadline | [Release status and provenance](docs/RELEASE_STATUS.md) |
 
-A contract address on its own is not proof of explorer verification. A public repository on its own is not a deployed app. We won't claim points for things that haven't been demonstrated.
+## Current limits
 
-**Event deadlines (10 October 2026 IST):** code freeze **5:30 PM**; final portal submission and evidence **5:45 PM**; demos **6:00–8:30 PM**. Submit only at [Monad Blitz Pune V3 event portal](https://blitz.devnads.com/events/monad-blitz-pune-v3). **No peer voting.** The judges evaluate against the [official rubric](https://app.notion.com/Judging-Process-Rubrics-Criteria-7366367594f2830e86ed8109e57a498e?pvs=21).
+This is a hackathon MVP with three public question packs, browser-based identities, and host-attested rewards. It has no anti-Sybil identity system, independent security audit, paid customers, verified demand metrics or mainnet deployment. Clearing browser storage can lose access to an existing host session. Public room state includes player display names and linked wallet addresses.
 
-Our full [submission checklist](docs/SUBMISSION.md) covers the basic, advanced and bonus evidence.
-
-## Current limitations
-
-- Source code and documentation are **public**, but a secure, independently hosted production site is **not verified**.
-- There is **no confirmed deployed reward-contract address** or successful public Testnet claim to cite here.
-- The contract trusts host-submitted winners and has **not** been audited for real-fund use.
-- The original exported app relies on development-host authentication. Do **not** expose the localhost mock sign-in as public authentication.
-- [SOURCE-INFO.txt](SOURCE-INFO.txt) records that parts of the original source predate the event's build window. **Organizers decide whether that affects eligibility**. We do not represent older work as created during the event.
-
-**BlitzBattle's goal is simple: make every competition worth learning from, and make optional rewards easier to verify.**
+A real contract and funded pool are evidenced. A completed on-chain settlement/claim, stage transaction, public demo video, social reach and custom domain are **not** claimed. The event's judges decide points and timing eligibility; the repository does not assign itself a score.

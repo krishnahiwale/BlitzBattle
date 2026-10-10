@@ -1,73 +1,80 @@
-# Getting started — run BlitzBattle locally
+# Getting started
 
-This guide applies to the **recovered original BlitzBattle source** and assumes Node.js 22.13+ and pnpm 11.25.0.
+BlitzBattle has a browser interface, an API and a database. Run all three locally with the included Cloudflare tooling; opening the HTML alone is insufficient.
 
-## 1 — Extract and install
+## Requirements
 
-Extract `BlitzBattle-GitHub-Ready.zip` (or the original ZIP), open its `BlitzBattle-GitHub-Ready` folder in VS Code, and open a terminal in the same folder as `package.json`. On macOS/Linux and Windows PowerShell:
+- Git, Node.js 24 and pnpm 11.25.0. The release check used Linux and Node 24.19.0.
+- A modern browser. Wallet extensions are needed only for the optional reward flow.
+- Network access to install dependencies. Local quizzes then use the local database.
+- On Windows, use WSL2. The test script invokes the POSIX `node_modules/.bin/esbuild` executable.
+
+The package declares Node >=22.13, but tests use Node's SQLite implementation and Node 24 is the verified setup. A fresh clone selects the portable execution profile automatically.
+
+## Install
 
 ```bash
-node --version
+git clone --branch release/deployed-site-2026-10-10 https://github.com/krishnahiwale/BlitzBattle.git
+cd BlitzBattle
 npm install --global pnpm@11.25.0
-pnpm install --frozen-lockfile
+pnpm config set --location=project --json allowBuilds '{"bufferutil":false,"esbuild":true,"fsevents":true,"sharp":true,"unrs-resolver":true,"utf-8-validate":false,"workerd":true}'
+pnpm install --frozen-lockfile --public-hoist-pattern=esbuild
 ```
 
-`pnpm` uses the included `pnpm-lock.yaml`. Do not delete that file or check in `node_modules`.
+The deployed snapshot's optional native build choices were unresolved. The local configuration command explicitly declines `bufferutil` and `utf-8-validate`; JavaScript fallbacks are sufficient. It retains the declared build permissions for the other dependencies. It changes installation policy in your local checkout, not application behavior. The hoist option exposes a locked transitive `esbuild` binary to the existing test script. Both steps are necessary for this preserved snapshot.
 
-## 2 — Build server and frontend
+If rerunning installation in non-interactive CI after changing the hoist option, use `CI=true pnpm install --frozen-lockfile --public-hoist-pattern=esbuild`. In a terminal, approve pnpm's prompt to recreate `node_modules` if it appears.
+
+## Build and initialize storage
 
 ```bash
 pnpm run build
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_closed_jubilee.sql
+pnpm start --port 8787
 ```
 
-A successful portable build creates `dist/server/wrangler.json`. The project uses Vite/Vinext with Cloudflare's Worker and D1 bindings, not a simple static Vercel SPA.
+Run the SQL command once on a fresh local database. Wait for `Ready on http://127.0.0.1:8787`, then visit that URL. All commands run from the repository root. Stop with Ctrl+C. Restart with `pnpm start --port 8787`; your local rooms remain in `.wrangler/state`.
 
-## 3 — Create the local D1 database once
+You do not need to sign in with ChatGPT for this app's quiz routes. The starter includes local auth utilities, but BlitzBattle uses its own guest player session. No `.env` file, private key or API key is needed for ordinary play.
 
-```bash
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_grey_champions.sql
-```
+## Check the first battle
 
-Only run the SQL migration for a fresh local database. Reapplying it to an existing database can fail. Local DB files are in `.wrangler/state` and must **not** be committed. Use a fresh state directory if resetting a development database.
+1. Create an unsponsored room as the host.
+2. Open the same URL in another browser profile or another browser, then join with the code.
+3. Start the room from the original profile. Confirm the countdown and first question appear.
+4. Answer once and confirm the UI locks the answer. Reload the host profile and confirm ownership remains.
+5. After five rounds, inspect the recap. In the host profile, view concept insights and download results.
 
-## 4 — Start the app
+Tabs in one profile normally share the same player token. Multiple incognito windows can also share one incognito session. Use separate browser profiles for reliable player separation.
 
-```bash
-pnpm run dev
-```
+## Development commands
 
-Navigate to `http://localhost:5173/signin-with-chatgpt?return_to=%2F` and then the app. This local URL activates the **development mock** identity route. Open a practice battle without a wallet. If multiple browser profiles share the same local mock identity, that is normal for this development-only mode.
+| Command | Purpose |
+| --- | --- |
+| `pnpm dev` | Vite/Vinext live-reload server, normally port 5173 |
+| `pnpm run build` | Produce `dist/client` and `dist/server` |
+| `pnpm start --port 8787` | Run the built Worker and local D1 |
+| `pnpm run typecheck` | TypeScript checking |
+| `pnpm test` | Service/session tests and in-memory EVM contract tests |
+| `pnpm run contract:compile` | Rebuild ABI, bytecode, public source and compiler input |
+| `pnpm run db:generate` | Generate a new migration after intentionally editing the schema |
 
-## 5 — Test the quiz workflow
+Rebuilding the contract is optional for first run: matching artifacts are committed. Do not generate a fresh initial migration just to install the app.
 
-1. Select AI & Machine Learning, Web3 & Monad or Python & Data.
-2. Click **Practice solo**; two **explicitly simulated** opponents appear.
-3. Answer five timed questions. Correct answers earn 100 points; there is **no speed bonus**.
-4. Read explanations and concept-by-concept personal recap.
-5. Create a shared practice room, copy its six-character code and join from a second browser window/profile.
-6. As host, start the room; observe the countdown, timed questions, leaderboard and human-only host insights.
+## Troubleshooting
 
-## 6 — Run the included checks
+| Symptom | Resolution |
+| --- | --- |
+| `ERR_PNPM_IGNORED_BUILDS` | Run the explicit local `allowBuilds` command above, then reinstall. |
+| `spawnSync node_modules/.bin/esbuild ENOENT` | Reinstall with `--public-hoist-pattern=esbuild`. |
+| Ganache warns about a missing µWS native module | The test runner falls back to JavaScript; check the test's final pass/fail result. |
+| `no such table: rooms` | Build, then initialize the same local database using the exact config and persistence path above. |
+| `table rooms already exists` | The initial migration has already been applied. Do not repeat it. |
+| Connection refused | Wait for Wrangler's `Ready` line and use the printed port. |
+| Host button is missing | Use the profile that created the room. If its storage was cleared before the fix, create a fresh room. |
+| Sponsored Start is disabled | Join at least two players, link every wallet, and confirm/register funding. |
+| Wallet transaction confirmed, app reports an error | Use the room's **Recover a confirmed transaction** form before sending another transaction. |
+| Wrong network | Switch the wallet to Monad Testnet, chain ID 10143. |
+| Public host returns Cloudflare bot filtering to a script | Test the public URL in an ordinary logged-out browser; do not count script filtering as a successful browser test. |
 
-```bash
-pnpm run check
-pnpm run contract:compile
-```
-
-`check` covers server/database lifecycle, room authorization, answer timing, wallet ownership and an in-memory EVM for the contract. Solidity recompilation should be necessary only after changing `contracts/BlitzRewards.sol`.
-
-## Common problems
-
-| Problem | Action |
-|---|---|
-| `pnpm` not found | Install `pnpm@11.25.0`, reopen terminal |
-| Missing `dist/server/wrangler.json` | Run `pnpm run build` successfully first |
-| `no such table: rooms` | Apply the committed SQL migration once to the same persisted D1 path |
-| `DB` binding unavailable | Use the repository's Vite/Cloudflare Worker development scripts; static-file hosting cannot run the API |
-| Sign-in redirects in production | Development mock identity is intentionally not a production authentication service; see DEPLOYMENT |
-| Wallet network rejected | Only Monad Testnet chain ID 10143 is supported |
-| Funding is pending | Wait for transaction confirmation on the explorer; never treat a hash alone as proof |
-
-## Useful files
-
-`app/page.tsx` is the UI; `lib/server.ts` is the API's domain logic; `lib/game.ts` calculates question phases; `lib/questions.ts` holds server-side answer keys; `db/schema.ts` and `drizzle/` manage storage; `contracts/BlitzRewards.sol` is the escrow; `scripts/check-*.mjs` are the test entry points.
+If asking for help, report the branch/commit, Node/pnpm versions, command, and non-sensitive error text. Never include the player bearer token, seed phrase or private key.

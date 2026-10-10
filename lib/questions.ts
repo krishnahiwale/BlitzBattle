@@ -1,29 +1,30 @@
-import type {PackId,Question} from "./types";
-const BANK:Record<PackId,Question[]>={
- ai:[
- {prompt:"An AI answer sounds confident. What should you do before using it as a fact?",options:["Check a reliable source","Make it longer","Ask for more confidence","Trust fluent text"],correct:0,explanation:"Fluent text can still contain mistakes. Verify important claims against reliable evidence.",concept:"AI literacy"},
- {prompt:"What does retrieval-augmented generation (RAG) add to an AI workflow?",options:["Relevant retrieved information","Guaranteed correct answers","Faster internet","A replacement for every database"],correct:0,explanation:"RAG retrieves relevant material as context for generation. The output still needs evaluation.",concept:"RAG"},
- {prompt:"Which prompt gives an assistant the clearest task?",options:["Summarize this article in three bullets for a beginner","Do something useful","Be very smart","Make everything perfect"],correct:0,explanation:"A concrete input, task, audience and output format reduce ambiguity.",concept:"Prompt design"},
- {prompt:"A model excels on training data but struggles on new data. What is a likely issue?",options:["Overfitting","Perfect generalization","Too much test accuracy","A correct SQL join"],correct:0,explanation:"Overfitting means learning training-specific patterns that do not generalize well.",concept:"Generalization"},
- {prompt:"How should you compare two AI assistants for a real use case?",options:["Use representative tasks and defined criteria","Compare only their names","Pick the longest responses","Pick the most confident answers"],correct:0,explanation:"Evaluate representative tasks using criteria such as correctness, usefulness and instruction following.",concept:"Evaluation"},
- ],
- web3:[
- {prompt:"What should you keep private when using a blockchain wallet?",options:["Your seed phrase and private key","Your public address","A public transaction hash","The network name"],correct:0,explanation:"The private key or seed phrase controls your wallet. Public addresses and transaction hashes are meant to be shared.",concept:"Wallet ownership"},
- {prompt:"In BlitzBattle, what can the reward contract enforce?",options:["Funded allocations and one claim per winner","The truth of every answer","The quality of every question","Who is the smartest person"],correct:0,explanation:"The server scores the quiz. The contract enforces the host-recorded allocations and claim rules.",concept:"Trust boundaries"},
- {prompt:"What does EVM compatibility help developers reuse?",options:["Ethereum-style contracts and development tools","A guaranteed profitable token","Every offchain database","A wallet's private key"],correct:0,explanation:"Monad's EVM compatibility supports familiar Solidity contracts and Ethereum development tools.",concept:"EVM"},
- {prompt:"Why show a confirmed funded prize pool before a battle?",options:["Players can verify that the reward budget exists","It proves the host can never make a mistake","It makes internet speeds equal","It replaces the question bank"],correct:0,explanation:"A funding receipt makes the budget visible. It does not verify quiz scoring or every host decision.",concept:"Escrow"},
- {prompt:"What do rewards in this app use?",options:["Monad Testnet MON with no cash value","Guaranteed cash prizes","A fixed rupee-to-MON rate","Mainnet funds from every player"],correct:0,explanation:"This app only supports Monad Testnet rewards. Joining is free; testnet tokens are for testing.",concept:"Testnet"},
- ],
- data:[
- {prompt:"In SQL, which clause filters groups after aggregation?",options:["HAVING","ORDER BY","SELECT DISTINCT","LIMIT"],correct:0,explanation:"HAVING filters aggregated groups. WHERE filters individual rows before grouping.",concept:"SQL aggregation"},
- {prompt:"Why fit a scaler on training data rather than the entire dataset?",options:["To avoid leaking test information into training","To make every value positive","To guarantee 100% accuracy","To remove all missing values"],correct:0,explanation:"Preprocessing learns from training data, then transforms validation or test data with the fitted parameters.",concept:"Data leakage"},
- {prompt:"Which pandas operation reads a CSV into a DataFrame?",options:["pd.read_csv(...)","pd.to_csv(...)","pd.read_model(...)","pd.select_sql(...)"],correct:0,explanation:"pandas.read_csv reads CSV data. DataFrame.to_csv writes a DataFrame to a CSV file.",concept:"Python basics"},
- {prompt:"Which task is a classification problem?",options:["Predict whether a ticket is resolved or unresolved","Predict tomorrow's temperature","Estimate a house price","Calculate an average"],correct:0,explanation:"Classification predicts a category. Regression predicts a numerical outcome.",concept:"ML tasks"},
- {prompt:"A dataset has extreme outliers. Which summary is usually less sensitive to them?",options:["Median","Arithmetic mean","Maximum","Range"],correct:0,explanation:"The median depends on ordering and is usually more robust to extreme values than the arithmetic mean.",concept:"Robust statistics"},
- ]
-};
-export function makeQuestions(pack:PackId):Question[]{return BANK[pack].map(q=>{
- const shuffled=q.options.map((text,i)=>({text,i}));
- for(let i=shuffled.length-1;i>0;i--){const a=new Uint32Array(1);crypto.getRandomValues(a);const j=a[0]%(i+1);[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
- return {...q,options:shuffled.map(x=>x.text),correct:shuffled.findIndex(x=>x.i===q.correct)};
-});}
+// This module is server-only in application imports; answers never enter the client bundle.
+export const packs = {
+ ai: {name:'AI & Machine Learning', tag:'Think like a machine', icon:'brain', color:'purple', description:'From training data to neural networks. Put your AI instincts to the test.', questions:[
+ {text:'A model scores 99% on training data, but only 61% on new data. What is the likely problem?', options:['Underfitting','Overfitting','Perfect generalization','Data normalization'], answer:1, topic:'Generalization', explanation:'Overfitting means the model learns the training examples too closely and fails to generalize to unseen data.'},
+ {text:'Which task is an example of unsupervised learning?', options:['Predicting a labeled spam message','Estimating house prices','Grouping customers without labels','Recognizing labeled handwritten digits'],answer:2,topic:'Learning types',explanation:'Clustering finds patterns and groups in data without needing target labels.'},
+ {text:'Why should you split data before fitting a scaler?',options:['To prevent data leakage','To increase the dataset size','To remove every outlier','To guarantee 100% accuracy'],answer:0,topic:'Data leakage',explanation:'Fit preprocessing only on training data so information from the test set does not influence the model.'},
+ {text:'What does retrieval add to a RAG application?', options:['Automatic model retraining','Guaranteed correct answers','A larger neural network','Relevant external context'],answer:3,topic:'RAG',explanation:'Retrieval supplies relevant external documents as context. The model can still make mistakes.'},
+ {text:'For a rare positive class, which metric measures how many actual positives were found?',options:['Accuracy','Recall','Specificity','Mean squared error'],answer:1,topic:'Evaluation',explanation:'Recall is true positives divided by all actual positives: TP / (TP + FN).'}
+ ]},
+ web3:{name:'Web3 & Monad',tag:'Your onchain origin story',icon:'diamond',color:'green',description:'Wallets, smart contracts, and the foundations of the decentralized web.',questions:[
+ {text:'What should you NEVER share when connecting a wallet to a dApp?',options:['Your public address','Your transaction hash','Your recovery phrase','Your preferred network'],answer:2,topic:'Wallet security',explanation:'A recovery phrase controls your wallet. A legitimate dApp never needs it.'},
+ {text:'What is a smart contract?',options:['A program executed on a blockchain','A password manager','A social agreement only','A cryptocurrency price chart'],answer:0,topic:'Smart contracts',explanation:'Smart contracts are programs whose state changes are validated by the blockchain network.'},
+ {text:'What can a transaction hash help you verify?',options:['Someone’s real-world identity','A transaction’s recorded status and details','That a project is risk-free','A wallet’s recovery phrase'],answer:1,topic:'Verification',explanation:'An explorer can use the hash to show transaction status, sender, destination, and recorded events.'},
+ {text:'Why use testnet tokens during a hackathon?',options:['They guarantee profits','They are always redeemable for cash','They remove all software bugs','They let you test without using mainnet funds'],answer:3,topic:'Testnets',explanation:'Testnets are development environments. Test tokens are used for testing and should not be presented as real earnings.'},
+ {text:'Why is EVM compatibility useful to Solidity developers?',options:['No testing is needed','Private keys become public','Existing Ethereum tools and contracts can be adapted','Every transaction becomes free'],answer:2,topic:'EVM',explanation:'EVM compatibility allows developers to reuse familiar Solidity workflows and many Ethereum tools, while checking network differences.'}
+ ]},
+ python:{name:'Python & Data',tag:'Small code. Big brain.',icon:'code',color:'orange',description:'Practical Python, clean data, and SQL essentials for curious builders.',questions:[
+ {text:'What is the result of len({1, 1, 2, 3}) in Python?',options:['4','3','2','An error'],answer:1,topic:'Sets',explanation:'A set contains unique elements. The duplicate 1 is stored only once.'},
+ {text:'Which SQL clause filters groups after aggregation?',options:['WHERE','ORDER BY','HAVING','LIMIT'],answer:2,topic:'SQL aggregation',explanation:'HAVING filters aggregate groups; WHERE filters individual rows before grouping.'},
+ {text:'What does a pandas DataFrame represent?',options:['A two-dimensional labeled table','Only a single number','A compiled Python module','An unchangeable string'],answer:0,topic:'Pandas',explanation:'A DataFrame is a labeled two-dimensional structure with rows and columns.'},
+ {text:'Which plot best reveals the relationship between two numeric variables?',options:['Pie chart','Single stacked bar','Word cloud','Scatter plot'],answer:3,topic:'Visualization',explanation:'A scatter plot displays paired numeric observations to reveal patterns, relationships, and outliers.'},
+ {text:'What does a LEFT JOIN preserve?',options:['Only matched right-table rows','Every row from the left table','Only unmatched rows','Every possible pair of rows'],answer:1,topic:'SQL joins',explanation:'LEFT JOIN keeps every left-table row and adds matching right-table values, or NULL when no match exists.'}
+ ]}
+} as const;
+export type PackId = keyof typeof packs;
+export const QUESTION_MS = 20000;
+export const COUNTDOWN_MS = 4000;
+export function position(started:number|null, now=Date.now()) { return started===null ? -1 : Math.floor((now-started)/QUESTION_MS); }
+export function score(correct:boolean, remaining:number) { return correct ? 100 + Math.max(0, Math.min(50,Math.floor(remaining/QUESTION_MS*50))) : 0; }
+export function catalog(){return Object.entries(packs).map(([id,p])=>({id,name:p.name,tag:p.tag,icon:p.icon,color:p.color,description:p.description,count:p.questions.length}));}

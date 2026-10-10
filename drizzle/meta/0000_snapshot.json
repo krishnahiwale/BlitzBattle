@@ -1,28 +1,21 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6d0c90ea-b123-429b-807f-05d72f91edc1",
+  "id": "5b371ee7-5c2e-4ace-abbc-67ebb44e1ded",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "answers": {
       "name": "answers",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "room_code": {
-          "name": "room_code",
+        "player": {
+          "name": "player",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "player_id": {
-          "name": "player_id",
+        "room": {
+          "name": "room",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -42,61 +35,39 @@
           "notNull": true,
           "autoincrement": false
         },
-        "earned": {
-          "name": "earned",
+        "correct": {
+          "name": "correct",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "submitted_at": {
-          "name": "submitted_at",
+        "points": {
+          "name": "points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "at": {
+          "name": "at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         }
       },
-      "indexes": {
-        "answers_once": {
-          "name": "answers_once",
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "answers_player_question_pk": {
           "columns": [
-            "room_code",
-            "player_id",
+            "player",
             "question"
           ],
-          "isUnique": true
+          "name": "answers_player_question_pk"
         }
       },
-      "foreignKeys": {
-        "answers_room_code_rooms_code_fk": {
-          "name": "answers_room_code_rooms_code_fk",
-          "tableFrom": "answers",
-          "tableTo": "rooms",
-          "columnsFrom": [
-            "room_code"
-          ],
-          "columnsTo": [
-            "code"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "answers_player_id_players_id_fk": {
-          "name": "answers_player_id_players_id_fk",
-          "tableFrom": "answers",
-          "tableTo": "players",
-          "columnsFrom": [
-            "player_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
@@ -110,8 +81,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "room_code": {
-          "name": "room_code",
+        "room": {
+          "name": "room",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "session": {
+          "name": "session",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -124,28 +102,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "token_hash": {
-          "name": "token_hash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "joined_at": {
-          "name": "joined_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "bot": {
-          "name": "bot",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
         "wallet": {
           "name": "wallet",
           "type": "text",
@@ -153,61 +109,33 @@
           "notNull": false,
           "autoincrement": false
         },
-        "challenge": {
-          "name": "challenge",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "challenge_expires": {
-          "name": "challenge_expires",
+        "joined": {
+          "name": "joined",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "claim_tx": {
-          "name": "claim_tx",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
       "indexes": {
-        "players_room_name": {
-          "name": "players_room_name",
+        "player_session": {
+          "name": "player_session",
           "columns": [
-            "room_code",
-            "name"
+            "room",
+            "session"
           ],
           "isUnique": true
         },
-        "players_room_wallet": {
-          "name": "players_room_wallet",
+        "player_wallet": {
+          "name": "player_wallet",
           "columns": [
-            "room_code",
+            "room",
             "wallet"
           ],
           "isUnique": true
         }
       },
-      "foreignKeys": {
-        "players_room_code_rooms_code_fk": {
-          "name": "players_room_code_rooms_code_fk",
-          "tableFrom": "players",
-          "tableTo": "rooms",
-          "columnsFrom": [
-            "room_code"
-          ],
-          "columnsTo": [
-            "code"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -222,29 +150,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "host_hash": {
-          "name": "host_hash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "owner_id": {
-          "name": "owner_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "title": {
           "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "sponsor": {
-          "name": "sponsor",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -257,94 +164,72 @@
           "notNull": true,
           "autoincrement": false
         },
-        "mode": {
-          "name": "mode",
+        "host": {
+          "name": "host",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "seconds": {
-          "name": "seconds",
+        "created": {
+          "name": "created",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "status": {
-          "name": "status",
-          "type": "text",
+        "started": {
+          "name": "started",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "practice": {
+          "name": "practice",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sponsored": {
+          "name": "sponsored",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'waiting'"
+          "default": 0
         },
-        "questions": {
-          "name": "questions",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "started_at": {
-          "name": "started_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "pool_wei": {
-          "name": "pool_wei",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'0'"
-        },
-        "escrow": {
-          "name": "escrow",
+        "contract": {
+          "name": "contract",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "funding_tx": {
-          "name": "funding_tx",
+        "fund_tx": {
+          "name": "fund_tx",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "finalized_tx": {
-          "name": "finalized_tx",
+        "settle_tx": {
+          "name": "settle_tx",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "finalize_before": {
-          "name": "finalize_before",
-          "type": "integer",
+        "pool": {
+          "name": "pool",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "claim_until": {
-          "name": "claim_until",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "refund_tx": {
-          "name": "refund_tx",
+        "sponsor": {
+          "name": "sponsor",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

@@ -1,53 +1,64 @@
-# API reference — `/api/battles`
+# Battle API
 
-The frontend invokes these JSON endpoints; route adapters are in `app/api/battles/` and behavior in `lib/server.ts`.
+Base path: **`/api/battle`**. Responses are JSON with `Cache-Control: no-store`. Mutations use POST with `Content-Type: application/json` and an `Origin` exactly matching the app origin.
 
-**Headers:** `Content-Type: application/json` for POST, `Authorization: Bearer <hostToken-or-playerToken>` for authorized actions. The platform supplies `oai-authenticated-user-id` for hosted, authenticated host actions. **Never send the identity header directly from an untrusted client in a public deployment.**
+## Session setup
 
-| Method | Route | Use | Authorization |
-|---|---|---|---|
-| `GET` | `/api/battles` | List up to 12 recent rooms | Public on reachable app |
-| `POST` | `/api/battles` | Create room; returns code and host token | Authenticated host |
-| `GET` | `/api/battles/:code` | Current lobby/question/leaderboard/recap snapshot | Optional player/host token |
-| `POST` | `/api/battles/:code/join` | Join under a display name; returns player token | Room must be waiting |
-| `POST` | `/api/battles/:code/start` | Start question countdown | Host token + host identity |
-| `POST` | `/api/battles/:code/answer` | Submit choice for live question | Player token |
-| `POST` | `/api/battles/:code/wallet-challenge` | Generate room-bound signed-message challenge | Player token; not yet started |
-| `POST` | `/api/battles/:code/wallet-verify` | Verify EIP-191 wallet signature | Player token; valid challenge |
-| `POST` | `/api/battles/:code/fund` | Verify actual contract-creation/funding tx and persist address | Host token + identity |
-| `POST` | `/api/battles/:code/finalize` | Verify on-chain winner allocation event | Host token + identity |
-| `POST` | `/api/battles/:code/claim` | Verify on-chain winner claim event | Player token |
-| `POST` | `/api/battles/:code/refund` | Verify host refund event | Host token + identity |
+Call `GET /api/battle?action=session` once and retain the returned `{ "token": "…" }`. Send the token in `X-Blitz-Session` on later calls. It is a lowercase 64-character hexadecimal bearer credential. Do not log, publish or put it in room URLs. A valid existing `bb_session` cookie is adopted when no header token is supplied. The application client manages this automatically.
 
-## Examples
+Every player needs a distinct session. `home.session` is a public SHA-256 identifier for wallet challenges; it cannot substitute for the token.
 
-Create practice room (request body):
+## Actions
 
-```json
-{"pack":"ai","mode":"practice","title":"AI Club Lightning Round","sponsor":"College AI Club","seconds":12,"bots":true}
+The body includes `action` plus the fields below. GET reads use query parameters instead.
+
+| Action | Method | Fields | Result / authorization |
+| --- | --- | --- | --- |
+| `session` | GET | none | Own session token and optional cookie |
+| `home` | GET or POST | none | Pack catalog, recent public rooms, caller history, session hash, server time |
+| `create` | POST | `name`, `title`, `pack`, optional `practice`, `sponsored` | `{code}`; creator becomes host and player |
+| `join` | POST | `code`, `name` | `{code}`; before start, max 16; repeated join for same session is idempotent |
+| `state` | GET or POST | `code` | Room, roster, host/me flags, timing, current question, recap and funding |
+| `start` | POST | `code`, optional `solo: true` | `{ok:true}`; host only; checks participants and reward readiness |
+| `answer` | POST | `code`, `question`, `choice` | `{locked:true}`; member only, current question, one answer |
+| `insights` | GET or POST | `code` | Per-question topic, correct, answered and total counts; host after finish |
+| `wallet` | POST | `code`, `wallet`, `signature` | `{ok:true}`; member before start; signed room/session/origin challenge |
+| `funding` | POST | `code`, `address`, `tx` | `{ok:true}`; host in a sponsored room; confirmed chain checks |
+| `settlement` | POST | `code`, `address`, `tx` | `{ok:true}`; host after finish; winners must match server state |
+
+`pack` is `ai`, `web3` or `python`. `question` and `choice` are zero-based integers; choices range 0–3. Names are trimmed to 24 characters and titles to 60. Room codes are normalized to uppercase and six characters. Creating rooms is limited to 30 per host session per hour; this is not a global anti-abuse defense.
+
+## Same-origin browser example
+
+Run from a page on your own local app origin. These calls create a real local practice room.
+
+```js
+const { token } = await fetch('/api/battle?action=session').then(r => r.json());
+async function battle(action, fields = {}) {
+  const response = await fetch('/api/battle', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Blitz-Session': token },
+    body: JSON.stringify({ action, ...fields })
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error);
+  return data;
+}
+const { code } = await battle('create', {
+  name: 'Alex', title: 'Practice', pack: 'ai', practice: true
+});
+await battle('start', { code });
+console.log(await battle('state', { code }));
 ```
 
-Create reward room (request body):
+The browser supplies `Origin` automatically. A non-browser client must set the exact origin explicitly for POST. This API is intended for same-origin usage; permissive cross-origin CORS is not enabled.
 
-```json
-{"pack":"web3","mode":"monad","title":"Monad Rewards Battle","sponsor":"Sponsor","seconds":20,"rewardMon":"0.03"}
-```
+## State details
 
-Submit an answer while question 0 is open:
+`index < 0` means lobby/countdown; inspect `started` to distinguish them. `finished` becomes true after all rounds. `deadline` and `now` are epoch milliseconds. `myAnswer` is the caller's selected option for the current question, or null. `recap` is empty until finish. `players` exposes scores from completed rounds; `winners` includes all top-score ties at finish. A non-member may read state as a spectator but cannot answer or obtain host insights.
 
-```json
-{"question":0,"choice":2}
-```
+`funding` contains `address`, `tx`, `settleTx`, `pool` and `sponsor`. Claim and refund transactions go directly from the wallet to the contract; there are no `claim` or `refund` API actions.
 
-Other POST payloads: `join: {"name":"Asha"}`, `wallet-verify: {"signature":"0x..."}`, `fund/finalize/claim/refund: {"tx":"0x...confirmed-transaction-hash"}`. Funding also requires a matching per-room contract deployed from the host wallet. Route `GET :code` intentionally hides future correct answers; explainers appear in reveal/recap.
+## Error handling
 
-## Rules and common errors
-
-- Room codes are six characters from the permitted alphabet; each room supports up to 20 entries.
-- Supported packs: `ai`, `web3`, `data`. Question timers: 10, 12, 15, 20 seconds.
-- Reward pool must be **0.001–1 testnet MON**. Practice has no token pool.
-- Incorrect/duplicate/late answers return errors (typically HTTP 409), with no client-side score override.
-- Signatures expire after five minutes and cannot be replayed after successful verification.
-- Server may return 401 for unauthenticated creation, 403 for insufficient permission, 404 for unknown room, 409 for invalid state/duplicates and 429 for repeated host creation.
-
-**Security note:** The example JSON describes an API contract, not a public unauthenticated API. The existing development host identity scheme needs an approved trusted public authentication gateway before internet-wide deployment.
+Failures return `{ "error": "Human-readable reason" }`. Common statuses are 400 for invalid input/state, 401 for a malformed session header, 403 for authorization/origin failure, 404 for missing rooms/actions, 405 for a disallowed GET action, 413 for oversized POST data and 429 for room-creation limits. Most chain validation failures are 400. The maximum POST text length is 12,000 characters. Do not infer success from a wallet popup: wait for a receipt and API acknowledgement.

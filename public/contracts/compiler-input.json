@@ -1,0 +1,24 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "BlitzRewards.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity 0.8.28;\n/// @title BlitzBattle sponsor-funded testnet reward escrow\n/// @notice Scores are offchain. Sponsor attests the winners; this is NOT a trustless score oracle.\ncontract BlitzRewards {\n    struct Battle { address sponsor; uint256 pool; uint64 deadline; bool settled; }\n    mapping(bytes32 => Battle) public battles;\n    mapping(bytes32 => mapping(address => uint256)) public claimable;\n    uint256 private locked = 1;\n    event Funded(bytes32 indexed id, address indexed sponsor, uint256 amount, uint64 deadline);\n    event Settled(bytes32 indexed id, address[] winners, uint256 share);\n    event Claimed(bytes32 indexed id, address indexed winner, uint256 amount);\n    event Refunded(bytes32 indexed id, uint256 amount);\n    modifier nonReentrant() { require(locked == 1, 'Reentrant'); locked = 2; _; locked = 1; }\n    function fund(bytes32 id, uint64 deadline) external payable {\n        require(id != bytes32(0) && msg.value > 0, 'Invalid funding');\n        require(battles[id].sponsor == address(0), 'Already funded');\n        require(deadline >= block.timestamp + 10 minutes && deadline <= block.timestamp + 7 days, 'Deadline');\n        battles[id] = Battle(msg.sender, msg.value, deadline, false);\n        emit Funded(id,msg.sender,msg.value,deadline);\n    }\n    function settle(bytes32 id, address[] calldata winners) external {\n        Battle storage b = battles[id];\n        require(msg.sender == b.sponsor && !b.settled, 'Not sponsor or settled');\n        require(block.timestamp < b.deadline, 'Expired');\n        require(winners.length > 0 && winners.length <= 16 && b.pool >= winners.length, 'Winners');\n        b.settled = true;\n        uint256 share = b.pool / winners.length;\n        for (uint256 i=0; i<winners.length; i++) {\n            require(winners[i] != address(0), 'Zero address');\n            for (uint256 j=0; j<i; j++) require(winners[i] != winners[j], 'Duplicate');\n            claimable[id][winners[i]] = share + (i == 0 ? b.pool % winners.length : 0);\n        }\n        emit Settled(id,winners,share);\n    }\n    function claim(bytes32 id) external nonReentrant {\n        uint256 amount = claimable[id][msg.sender];\n        require(amount > 0, 'Nothing to claim');\n        claimable[id][msg.sender] = 0;\n        (bool ok,) = msg.sender.call{value:amount}('');\n        require(ok,'Transfer failed');\n        emit Claimed(id,msg.sender,amount);\n    }\n    function refund(bytes32 id) external nonReentrant {\n        Battle storage b = battles[id];\n        require(msg.sender == b.sponsor && !b.settled, 'Not refundable');\n        require(block.timestamp >= b.deadline, 'Not expired');\n        b.settled = true;\n        (bool ok,) = msg.sender.call{value:b.pool}('');\n        require(ok,'Transfer failed');\n        emit Refunded(id,b.pool);\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "paris",
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode.object",
+          "evm.deployedBytecode.object"
+        ]
+      }
+    }
+  }
+}

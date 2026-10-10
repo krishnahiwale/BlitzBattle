@@ -1,55 +1,68 @@
-# Publishing and deployment — GitHub, Cloudflare D1 and Monad
+# Deploy the complete project
 
-## What is already available and what is not
+## Existing deployment
 
-- The GitHub repo **already exists and is public**: https://github.com/krishnahiwale/BlitzBattle. At the time this source package was assembled, it contained only a short README; the source must be pushed.
-- The original BlitzBattle project had a **ChatGPT Sites-hosted development app**. That is **not equivalent to an independently accessible production website**. Do not claim the demo URL meets the public-hosting rubric without checking in a logged-out browser.
-- The source does **not** contain a real deployed Monad contract address. The contract is deployed **per funded room**, and its on-chain address is in the actual funding transaction receipt.
+The current app runs at **https://labelrush-monad.krishh013.chatgpt.site** on ChatGPT Sites with Cloudflare Workers and D1. Its unchanged application source is the deployed snapshot in this release branch. The public GitHub repository is the source distribution; it is not the application server.
 
-## A — Push full files to GitHub
+The site's audience was set to public on 10 October 2026 at 18:18:16 IST. Check it in a logged-out browser before presenting it to judges. Our non-browser anonymous request hit Cloudflare bot filtering (403 / code 1010); no successful logged-out browser test is claimed. Earlier authenticated production checks exercised the battle-start fix successfully.
 
-Use a terminal with Git installed and authenticated. Easiest safe method: clone the existing repo, then copy **the contents** of this source package into that checkout, keeping `.git` from the checkout:
+The hostname's `labelrush-monad` slug is historical; the running product is BlitzBattle. No custom domain has been configured by this release.
+
+## Why GitHub Pages is insufficient
+
+`app/api/battle/route.ts` needs a Worker runtime and the `DB` D1 binding. Static hosting can serve assets but cannot create persistent multiplayer rooms, validate answers or inspect receipts. Use the existing full-stack deployment or provision a Worker and D1 together.
+
+## Deploy a separate Cloudflare copy
+
+This is an operator recipe for an independent deployment; it was not executed against a second Cloudflare account during this handoff. First complete [local setup](GETTING_STARTED.md), including the explicit install settings, tests and build. A Cloudflare account with Workers/D1 access is required for this path.
 
 ```bash
-git clone https://github.com/krishnahiwale/BlitzBattle.git
-cd BlitzBattle
-# Copy all files from the downloaded BlitzBattle-GitHub-Ready folder into this checkout,
-# including .github and the application folders, then:
-git status
-git add .
-git commit -m "Add BlitzBattle app, Solidity escrow and full project docs"
-git push origin main
+pnpm exec wrangler login
+pnpm exec wrangler d1 create blitzbattle
 ```
 
-Alternatively initialize in the extracted source folder and merge existing README history first (instructions in root README). **Never force-push as a shortcut.** If code freeze has already passed, do not push any code changes in violation of event rules.
+Copy the real D1 database UUID returned by the create command. After `pnpm run build`, create a production configuration **beside** the generated Worker configuration so its relative bundle paths remain valid:
 
-## B — Run the project locally
+```bash
+export BLITZ_D1_ID='paste-the-created-database-uuid'
+node --input-type=module - <<'JS'
+import fs from 'node:fs';
+const databaseId = process.env.BLITZ_D1_ID;
+if (!databaseId || databaseId === 'paste-the-created-database-uuid') {
+  throw new Error('Set BLITZ_D1_ID to your real Cloudflare D1 UUID');
+}
+const config = JSON.parse(fs.readFileSync('dist/server/wrangler.json', 'utf8'));
+config.name = 'blitzbattle';
+config.workers_dev = true;
+config.d1_databases = [{ binding: 'DB', database_name: 'blitzbattle', database_id: databaseId }];
+fs.writeFileSync('dist/server/wrangler.production.json', JSON.stringify(config, null, 2));
+JS
 
-Follow [GETTING_STARTED.md](GETTING_STARTED.md); the project uses Cloudflare D1-backed server routes and **cannot run as static HTML alone**. For public hosting, a Cloudflare Worker or other environment that implements its runtime APIs, persistent database binding, and authentication is necessary.
+# Only for a NEW, EMPTY remote database:
+pnpm exec wrangler d1 execute DB --remote --config dist/server/wrangler.production.json --file drizzle/0000_closed_jubilee.sql
+pnpm exec wrangler deploy --config dist/server/wrangler.production.json
+```
 
-## C — Public production hosting (requires engineering/configuration)
+Use the exact public HTTPS URL Wrangler returns. The all-zero UUID in the generated local config is a local placeholder; do not deploy it as a production database binding. Recreate the production config after each build, since build output is generated. Choose another Worker/database name if those names already belong to a different project in your account.
 
-This recovered export uses a **ChatGPT Sites-specific auth gateway**, local development identity shim and integration build plugins. A direct Vercel import, GitHub Pages upload, or Cloudflare deploy **is not guaranteed** to work securely without adapting the runtime:
+The app uses guest bearer sessions rather than a server wallet. Ordinary play requires no secrets. Wallet private keys remain with participants. The RPC endpoint is configured in `lib/chain.ts`; it must be reachable from browsers and the Worker for reward checks.
 
-1. Establish a trusted public login (e.g. properly implemented OAuth) and change the host authorization so clients cannot set `oai-authenticated-user-id` themselves.
-2. Provision a production D1 database and Worker binding `DB`; apply `drizzle/0000_grey_champions.sql` **once** to the production database.
-3. Configure Worker compat flags/runtime and deploy a Worker artifact from a verified production build; use Cloudflare's current deployment docs for the precise CLI steps.
-4. Use HTTPS and validate cross-device room joins, API, D1 persistence, authentication, funding/claim flows.
-5. Record the actual, **logged-out-accessible** website URL. Do not use a private owner-only ChatGPT Sites URL as public-host evidence.
+The `.openai/hosting.json` project ID records the original Sites project. It does not grant access or contain a secret. Cloning this repository does not authorize someone to publish into that owner's Sites project; use your own deployment account and database for a separate copy.
 
-A production deployment is **not completed** by this documentation package. Code modifications and actual account access are needed for public self-hosting. A public GitHub URL and a source ZIP by themselves do not fulfill the website points.
+## Deployment verification
 
-## D — Confirm on Monad Testnet
+1. Open the public URL while logged out and confirm the app and static assets load.
+2. Create a room and join with a second browser profile/device.
+3. Start, answer, refresh and finish; confirm scores, recap and host insights.
+4. Check that a non-host cannot start the room and that repeat answers are rejected.
+5. For rewards, use a funded testnet wallet and keep actual deployment, funding, settlement and claim receipts.
+6. Confirm the contract source on the chosen explorer and preserve the displayed verification status.
+7. Put the actual live URL and contract links in README. Do not substitute a placeholder address.
 
-Use a disposable wallet with testnet MON only. Create a reward room, sign and deploy the escrow, wait for a confirmed successful transaction, and record:
+## Data and updates
 
-- Deployment transaction hash and deployed `BlitzRewards` contract address.
-- Network `Monad Testnet` (10143) and [explorer page](https://testnet.monadscan.com).
-- One actual successful claim transaction, if you can complete a test round.
-- Source verification status as explicitly shown by the explorer (deploying does not automatically verify source).
+Back up production D1 before schema changes. The included migration creates a new database schema and must not be replayed against an existing one. Use incremental migrations for future versions. Reverting Worker code does not revert database contents or blockchain transactions.
 
-**Per-room escrows:** You may present one funded demonstration room's contract address. Do not invent a global address; the original design instantiates a new contract for each reward battle. Contract verification requires matching Solidity compiler **0.8.24**, code and settings from its actual build; compilation is driven by `scripts/compile-contract.mjs`. Use the exact build's inputs/output rather than guessing optimizer/EVM settings.
+The event code freeze has passed. This release publishes existing app code and new documentation; future feature changes require a clearly dated post-event release rather than rewriting the frozen event record.
 
-## E — Evidence pack for rubric
-
-Public GitHub link, independently reachable site, real deployed contract/explorer verification page, successful real transaction hash, clean README run from fresh checkout, social post URLs and timestamps, 30-second demo, creative ad, view evidence and submission confirmation. See [SUBMISSION.md](SUBMISSION.md).
+References: [Cloudflare D1 commands](https://developers.cloudflare.com/d1/wrangler-commands/), [Wrangler deployment commands](https://developers.cloudflare.com/workers/wrangler/commands/#deploy).
