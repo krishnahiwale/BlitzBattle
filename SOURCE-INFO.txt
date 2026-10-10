@@ -1,0 +1,8 @@
+BlitzBattle source export
+Source commit: d4f50f4af6076aee50d68b62bb257d77599c491c
+Original commit date: 2026-10-09T19:41:44+01:00
+Original commit in India: 2026-10-10 00:11:44 +05:30
+Export includes the tracked source at this revision.
+Export-only change: removed project_id from .openai/hosting.json.
+Added files: START-HERE.md and this SOURCE-INFO.txt.
+The application source was built before the October 10 hackathon's 11:30 AM IST coding start.
