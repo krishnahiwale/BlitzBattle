@@ -153,20 +153,6 @@ pnpm run contract:compile
 
 These commands are supplied for reproduction; **the full checks were not rerun during this README rewrite**. Detailed help: [Getting Started](docs/GETTING_STARTED.md), [Architecture](docs/ARCHITECTURE.md), [API](docs/API.md), [Security](docs/SECURITY.md), [Deployment](docs/DEPLOYMENT.md).
 
-## Preparing for the three-minute demo
-
-**Show the app instead of spending two minutes explaining slides.** Our recommended flow:
-
-| Time | What to show |
-| --- | --- |
-| 0:00–0:15 | What BlitzBattle solves |
-| 0:15–0:45 | Create/open a room and show the join code |
-| 0:45–1:35 | Answer a timed question, show scoring and recap |
-| 1:35–2:25 | **If genuinely deployed:** demonstrate the real funded Monad room and a confirmed transaction |
-| 2:25–2:45 | Brief architecture and what makes it new |
-| 2:45–3:00 | Say public repo, actual live URL, real contract address and network/deployment details |
-
-Open our complete [**Preparing for Your Project Demo**](docs/DEMO.md) for the presenter script, rehearsal checklist and fallback plan.
 
 ### Evidence judges need
 
